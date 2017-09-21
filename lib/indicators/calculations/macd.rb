@@ -17,27 +17,38 @@ module Indicators
 
       macd_line = []
 
+      # calculate MACD line
       adj_closes.each_with_index do |adj_close, index|
         if index+1 >= slower_periods
           # Calibrate me! Not sure why it doesn't accept from or from_faster.
           faster_ema = Indicators::Ema.calculate(adj_closes[0..index], faster_periods).last
           slower_ema = Indicators::Ema.calculate(adj_closes[0..index], slower_periods).last
           macd_line[index] = faster_ema - slower_ema
+          output[index] = [macd_line[index]]
+  
           if index+1 >= slower_periods+signal_periods
-            signal_line = Indicators::Ema.calculate(macd_line[(-signal_periods)..index], signal_periods).last 
-            # Output is [MACD, Signal, MACD Hist]
-            macd_histogram = macd_line[index] - signal_line
-            output[index] = [macd_line[index], signal_line, macd_histogram]
           else 
-            output[index] = [macd_line[index], nil, nil]
           end
+
         else
           macd_line[index] = nil
           output[index] = nil
         end
       end
 
-      return output
+      # calculcate Signal line & histogram
+      macd_data = Indicators::Data.new(macd_line).output
+      signal_line = macd_data.calc(type: :ema, params: signal_periods)
+
+      rev_signal_line = signal_line.reverse
+      rev_output = output.reverse
+
+      rev_signal_line.each_with_index do |sig, i|
+        rev_output[i] << sig
+        rev_output[i] << rev_output[i].first - sig
+      end
+
+      return rev_output.reverse
 
     end
 
