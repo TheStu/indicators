@@ -37,8 +37,8 @@ module Indicators
       end
 
       # calculcate Signal line & histogram
-      macd_data = Indicators::Data.new(macd_line).output
-      signal_line = macd_data.calc(type: :ema, params: signal_periods)
+      macd_data = Indicators::Data.new(macd_line)
+      signal_line = macd_data.calc(type: :ema, params: signal_periods).output
 
       rev_signal_line = signal_line.reverse
       rev_output = output.reverse
