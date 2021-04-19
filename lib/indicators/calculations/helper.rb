@@ -71,8 +71,10 @@ end
 # Extra methods for mathematical calculations.
 module Enumerable
 
-  def sum
-    return self.inject(0){|accum, i| accum + i }
+  unless method_defined?(:sum)
+    def sum
+      return self.inject(0){|accum, i| accum + i }
+    end
   end
 
   def mean
